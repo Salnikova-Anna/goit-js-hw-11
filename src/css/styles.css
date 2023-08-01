@@ -1,0 +1,58 @@
+/* ==================SEARCH FORM================== */
+.search-form {
+  padding: 8px 0;
+  background-color: #0f3fcffb;
+  border-radius: 5px;
+  text-align: center;
+}
+
+input[name='searchQuery'] {
+  padding: 5px;
+  border-radius: 5px;
+  border: none;
+}
+
+/* ==================GALLERY================== */
+.gallery {
+  margin: 20px auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.photo-card {
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+  box-shadow: 0 8px 8px -5px rgba(0, 0, 0, 0.3);
+}
+
+.info {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+b {
+  display: block;
+}
+
+/* ==================LOAD-MORE BUTTON================== */
+.load-more {
+  padding: 10px 20px;
+  display: none;
+  margin: 0 auto;
+  border-radius: 5px;
+  border: none;
+  color: #ffffff;
+  background-color: #0f3fcffb;
+}
+
+.on-show {
+  display: block;
+}
