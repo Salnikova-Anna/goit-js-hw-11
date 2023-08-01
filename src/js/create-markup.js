@@ -1,7 +1,7 @@
 export function createGalleryMarkup(galleryItemsArray) {
   return galleryItemsArray
     .map(item => {
-      return `<div class="photo-card">
+      return `<a href="${item.largeImageURL}" class="gallery__link"><div class="photo-card">
         <img src="${item.webformatURL}" alt="${item.tags}" width="300" height="200" loading="lazy"  />
         <div class="info">
           <p class="info-item">
@@ -21,7 +21,7 @@ export function createGalleryMarkup(galleryItemsArray) {
             ${item.downloads}
           </p>
         </div>
-      </div>`;
+      </div></a>`;
     })
     .join('');
 }

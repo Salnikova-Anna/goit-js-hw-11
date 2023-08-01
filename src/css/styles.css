@@ -1,5 +1,8 @@
 /* ==================SEARCH FORM================== */
 .search-form {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
   padding: 8px 0;
   background-color: #0f3fcffb;
   border-radius: 5px;
@@ -12,12 +15,26 @@ input[name='searchQuery'] {
   border: none;
 }
 
+button[type='submit'] {
+  border: none;
+  line-height: 0;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
 /* ==================GALLERY================== */
 .gallery {
+  max-width: 1260px;
   margin: 20px auto;
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
+}
+
+.gallery__link {
+  color: #000000;
+  text-decoration: none;
 }
 
 .photo-card {
@@ -53,6 +70,6 @@ b {
   background-color: #0f3fcffb;
 }
 
-.on-show {
+.is-shown {
   display: block;
 }
