@@ -9,27 +9,34 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 refs.searchForm.addEventListener('submit', handleSearchFormSubmit);
-refs.loadMoreBtn.addEventListener('click', handleLoadMoreBtnClick);
 
-let page = 1;
+let page = 0;
 let searchQuery = '';
 
 let lightbox = new SimpleLightbox('.gallery a', {
-  captionsData: 'alt',
   captionDelay: 250,
   disableScroll: true,
 });
+
+let options = {
+  root: null,
+  rootMargin: '300px',
+  threshold: 1.0,
+};
+
+let observer = new IntersectionObserver(handleLoadMore, options);
 
 async function handleSearchFormSubmit(event) {
   event.preventDefault();
 
   refs.galleryWrap.innerHTML = '';
+  observer.unobserve(refs.jsGuard);
 
-  hideBtn(refs.loadMoreBtn);
+  // hideBtn(refs.loadMoreBtn);
 
   page = 1;
 
-  if (!event.target.elements.searchQuery.value) {
+  if (!event.target.elements.searchQuery.value.trim()) {
     Notiflix.Notify.info('Please, insert a search query');
     return;
   }
@@ -52,9 +59,13 @@ async function handleSearchFormSubmit(event) {
 
     refs.galleryWrap.innerHTML = createGalleryMarkup(hits);
 
-    if (hits.length === PER_PAGE && totalHits > PER_PAGE) {
-      showBtn(refs.loadMoreBtn);
+    if (totalHits > PER_PAGE) {
+      observer.observe(refs.jsGuard);
     }
+
+    // if (hits.length === PER_PAGE && totalHits > PER_PAGE) {
+    //   showBtn(refs.loadMoreBtn);
+    // }
 
     lightbox.refresh();
 
@@ -98,52 +109,86 @@ async function handleSearchFormSubmit(event) {
   //   });
 }
 
-async function handleLoadMoreBtnClick(event) {
-  hideBtn(refs.loadMoreBtn);
+function handleLoadMore(entries, observer) {
+  entries.forEach(async entry => {
+    if (entry.isIntersecting) {
+      try {
+        const response = await fetchSearchQueryData(searchQuery, page);
+        const { hits, total, totalHits } = response.data;
 
-  try {
-    const response = await fetchSearchQueryData(searchQuery, page);
-    const { hits, total, totalHits } = response.data;
+        const galleryMarkUp = createGalleryMarkup(hits);
+        refs.galleryWrap.insertAdjacentHTML('beforeend', galleryMarkUp);
 
-    const galleryMarkUp = createGalleryMarkup(hits);
-    refs.galleryWrap.insertAdjacentHTML('beforeend', galleryMarkUp);
+        lightbox.refresh();
 
-    lightbox.refresh();
+        page += 1;
 
-    if (hits.length === PER_PAGE && PER_PAGE * page !== totalHits) {
-      showBtn(refs.loadMoreBtn);
-    } else {
-      hideBtn(refs.loadMoreBtn);
-      Notiflix.Notify.failure(
-        "We're sorry, but you've reached the end of search results."
-      );
+        if (!hits.length) {
+          observer.unobserve(refs.jsGuard);
+          Notiflix.Notify.failure(
+            "We're sorry, but you've reached the end of search results."
+          );
+        }
+      } catch (error) {
+        console.error(error);
+        observer.unobserve(refs.jsGuard);
+        Notiflix.Notify.failure(
+          "We're sorry, but you've reached the end of search results."
+        );
+      }
     }
-
-    page += 1;
-  } catch (error) {
-    console.error(error);
-  }
-
-  /*=================== Variant 2 - then-catch method ===================*/
-  // fetchSearchQueryData(searchQuery, page)
-  //   .then(({ data }) => {
-  //     console.log(data);
-  //     console.log(searchQuery);
-  //     const galleryMarkUp = createGalleryMarkup(data.hits);
-  //     refs.galleryWrap.insertAdjacentHTML('beforeend', galleryMarkUp);
-
-  //     lightbox.refresh();
-
-  //     if (data.hits.length === PER_PAGE && PER_PAGE * page !== data.totalHits) {
-  //       showBtn(refs.loadMoreBtn);
-  //     } else {
-  //       hideBtn(refs.loadMoreBtn);
-  //       Notiflix.Notify.failure(
-  //         "We're sorry, but you've reached the end of search results."
-  //       );
-  //     }
-
-  //     page += 1;
-  //   })
-  //   .catch(console.error);
+  });
 }
+
+/*=======================USING LOAD-MORE BUTTON=====================*/
+
+// refs.loadMoreBtn.addEventListener('click', handleLoadMoreBtnClick);
+// async function handleLoadMoreBtnClick(event) {
+//   hideBtn(refs.loadMoreBtn);
+
+//   try {
+//     const response = await fetchSearchQueryData(searchQuery, page);
+//     const { hits, total, totalHits } = response.data;
+
+//     const galleryMarkUp = createGalleryMarkup(hits);
+//     refs.galleryWrap.insertAdjacentHTML('beforeend', galleryMarkUp);
+
+//     lightbox.refresh();
+
+//     if (hits.length === PER_PAGE && PER_PAGE * page !== totalHits) {
+//       showBtn(refs.loadMoreBtn);
+//     } else {
+//       hideBtn(refs.loadMoreBtn);
+//       Notiflix.Notify.failure(
+//         "We're sorry, but you've reached the end of search results."
+//       );
+//     }
+
+//     page += 1;
+//   } catch (error) {
+//     console.error(error);
+//   }
+
+/*=================== Variant 2 - then-catch method ===================*/
+// fetchSearchQueryData(searchQuery, page)
+//   .then(({ data }) => {
+//     console.log(data);
+//     console.log(searchQuery);
+//     const galleryMarkUp = createGalleryMarkup(data.hits);
+//     refs.galleryWrap.insertAdjacentHTML('beforeend', galleryMarkUp);
+
+//     lightbox.refresh();
+
+//     if (data.hits.length === PER_PAGE && PER_PAGE * page !== data.totalHits) {
+//       showBtn(refs.loadMoreBtn);
+//     } else {
+//       hideBtn(refs.loadMoreBtn);
+//       Notiflix.Notify.failure(
+//         "We're sorry, but you've reached the end of search results."
+//       );
+//     }
+
+//     page += 1;
+//   })
+//   .catch(console.error);
+// }
